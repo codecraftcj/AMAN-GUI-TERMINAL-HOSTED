@@ -25,7 +25,13 @@ export const logoutUser = async () => {
   localStorage.removeItem("token");
 };
 
-export const fetchLatestWaterParameters = async () => {
+export const fetchLatestWaterParameters = async () => { //@TODO: modify to get the latest water parameters of 1 device only
     const response = await api.get("/water-parameters/latest");
     return response.data;
-    }
+}
+
+export const fetchDeviceJobs = async (device_id) => {
+    const response = await api.get(`/device/${device_id}/jobs`);
+    return response.data;
+}
+
