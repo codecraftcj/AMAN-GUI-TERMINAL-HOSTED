@@ -4,11 +4,12 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(),tailwindcss()],
+  plugins: [react(), tailwindcss()],
   server: {
-    host: '0.0.0.0',  // Allow LAN access
-    port: 80,         // Use default HTTP port
+    host: '0.0.0.0',  // Allow access from any network interface
+    port: 80,         // Run on port 80
     strictPort: true, // Ensures it runs on port 80
+    cors: true,       // Allow Cross-Origin requests
+    allowedHosts: true,  // Allow all hosts to access
   }
 })
-
