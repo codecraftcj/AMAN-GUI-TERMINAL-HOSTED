@@ -1,4 +1,3 @@
-import React from "react";
 
 const DeviceControls = () => (
   <div className="p-6 bg-gray-900 text-white rounded-lg shadow-md">

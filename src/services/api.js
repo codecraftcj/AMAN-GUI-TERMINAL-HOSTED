@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://simplegon-desktop:8080";
+export const API_URL = "http://simplegon-desktop:8080";
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -8,7 +8,6 @@ export const api = axios.create({
 });
 
 export const loginUser = async (credentials) => {
-    console.log("API URL: ", API_URL)
     const response = await api.post("/auth/login", credentials);
     return response.data;
 };
@@ -35,3 +34,8 @@ export const fetchDeviceJobs = async (device_id) => {
     return response.data;
 }
 
+
+export const fetchDeviceCameraURL = async (device_id) => {
+    let camera_url = `${API_URL}/device/${device_id}/camera`
+    return camera_url;
+}

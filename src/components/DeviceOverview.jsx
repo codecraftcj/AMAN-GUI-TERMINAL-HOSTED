@@ -1,4 +1,4 @@
-import { fetchLatestWaterParameters, fetchDeviceJobs } from "../services/api";
+import { fetchLatestWaterParameters, fetchDeviceJobs,fetchDeviceCameraURL } from "../services/api";
 import { useEffect, useState } from "react";
 
 const DeviceOverview = () => {
@@ -6,7 +6,7 @@ const DeviceOverview = () => {
     const [waterParameters, setWaterParameters] = useState(null);
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [cameraURL,setCameraURL] = useState(null);
     useEffect(() => {
         let isMounted = true; 
 
@@ -34,10 +34,13 @@ const DeviceOverview = () => {
                 console.error(error);
             }
         };
-
+        const fetchDeviceCamera = async(device_id) =>{
+            const camera_url = await fetchDeviceCameraURL(DEVICE_ID);
+            setCameraURL(camera_url)
+        }
         const interval = setInterval(fetchWaterParameters, 5000);
         const interval2 = setInterval(fetchDeviceJobsJSON, 5000);
-
+        fetchDeviceCamera(DEVICE_ID)
         return () => {
             isMounted = false;
             clearInterval(interval);
@@ -95,6 +98,14 @@ const DeviceOverview = () => {
                             </table>
                         ) : (
                             <p>No jobs available</p>
+                        )}
+                    </div>
+                    <div className="mt-6">
+                        <h3 className="text-xl font-bold">Camera Feed</h3>
+                        {cameraURL ? (
+                            <img src={cameraURL} alt="Camera Feed" className="mt-2 w-full rounded-lg" />
+                        ) : (
+                            <p>No camera feed available</p>
                         )}
                     </div>
                 </>
