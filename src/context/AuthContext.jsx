@@ -9,12 +9,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-    //   try {
-    //     const userData = await fetchUser();
-    //     setUser(userData);
-    //   } catch (error) {
-    //     setUser(null);
-    //   }
+      try {
+        const userData = await fetchUser(); // Fetch authenticated user
+        setUser(userData);
+      } catch (error) {
+        setUser(null);
+      }
       setLoading(false);
     };
 
@@ -23,15 +23,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const userData = await loginUser(credentials);
-      setUser(userData);
+      const response = await loginUser(credentials); // API call to login user
+      localStorage.setItem("token", response.token); // Store token
+      setUser(response.user); // Save user data
+      return response.user; // Return user data to determine redirect path
     } catch (error) {
       throw new Error("Invalid credentials");
     }
   };
 
   const logout = async () => {
-    await logoutUser();
+    localStorage.removeItem("token"); // Remove token on logout
     setUser(null);
   };
 

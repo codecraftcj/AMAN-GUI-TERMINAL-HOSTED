@@ -18,7 +18,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       await login(credentials);
-      navigate("/"); // Redirect based on role after login
+      navigate("/development"); // Redirect based on role after login
     } catch (err) {
       console.error(err);
       setError("Invalid email or password");

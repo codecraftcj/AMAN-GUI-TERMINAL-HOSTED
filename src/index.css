@@ -1,7 +1,47 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "WixMadeforDisplay";
+  src: url("./assets/fonts/WixMadeforDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "WixMadeforDisplay";
+  src: url("./assets/fonts/WixMadeforDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "WixMadeforDisplay";
+  src: url("./assets/fonts/WixMadeforDisplay-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "WixMadeforDisplay";
+  src: url("./assets/fonts/WixMadeforDisplay-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "WixMadeforDisplay";
+  src: url("./assets/fonts/WixMadeforDisplay-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "WixMadeforDisplay", sans-serif;
+}
+*{
+  font-family: "WixMadeforDisplay", sans-serif;
+}
+a{
+  text-decoration: none !important;
+}
+
+:root {
+  font-family: "WixMadeforDisplay", sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -26,8 +66,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -44,7 +82,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }

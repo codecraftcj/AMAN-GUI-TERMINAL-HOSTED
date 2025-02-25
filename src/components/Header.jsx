@@ -1,33 +1,34 @@
 import React from "react";
-import { FaBell } from "react-icons/fa";
-import { FiSearch } from "react-icons/fi";
+import { IoMenu, IoSearchOutline, IoNotificationsOutline } from "react-icons/io5";
+import Logo from "../assets/aman-logo-dark.png";
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
   return (
-    <header className="flex items-center justify-between bg-white shadow-md px-6 py-3">
-      {/* Logo */}
-      <div className="flex items-center">
-        <img src="/logo.png" alt="AMAN Logo" className="h-10 w-auto" />
+    <header className="w-full bg-white p-4 flex items-center justify-between fixed top-0 left-0 right-0 z-40 shadow-md">
+      {/* Left: Mobile Menu Button */}
+      <div className="flex items-center space-x-3">
+        <button className="bg-transparent lg:hidden p-2" onClick={toggleSidebar}>
+          <IoMenu size={24} className="text-black" />
+        </button>
+        <img src={Logo} alt="AMAN Logo" className="h-10" />
       </div>
 
-      {/* Search Bar */}
-      <div className="relative flex-grow mx-6">
-        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+      {/* Middle: Search Bar */}
+      <div className="relative flex-1 max-w-lg mx-6 hidden md:block">
         <input
           type="text"
           placeholder="Search"
-          className="w-full pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-10 py-2 border rounded-lg focus:outline-none"
         />
+        <IoSearchOutline size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
       </div>
 
-      {/* Notification & Profile */}
+      {/* Right: Notifications & Profile */}
       <div className="flex items-center space-x-4">
-        <button className="relative">
-          <FaBell className="text-blue-600 text-xl" />
+        <button className="p-2 bg-transparent">
+          <IoNotificationsOutline size={24} className="text-black" />
         </button>
-        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-          <span className="text-gray-700 font-semibold">U</span>
-        </div>
+        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-700">U</div>
       </div>
     </header>
   );

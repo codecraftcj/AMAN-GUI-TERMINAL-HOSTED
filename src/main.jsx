@@ -11,11 +11,10 @@ import UserDashboard from './pages/UserDashboard.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import DeviceOverview from './components/DeviceOverview.jsx';
-
+import DeviceManagement from './components/DeviceManagement.jsx'
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   { path: "/development", element: <UserDashboard /> }, //dito pre
-  { path: "/testing-cj", element: <DeviceOverview /> },
   {
     path: "/",
     element: <ProtectedRoute />, // Ensures user is logged in
@@ -25,6 +24,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute role="user" />,
         children: [
           { path: "", element: <UserDashboard /> },
+          { path: "device-overview", element: <DeviceOverview /> },
         ],
       },
       {
@@ -37,6 +37,10 @@ const router = createBrowserRouter([
       },
     ],
   },
+  { path: "/user-dashboard", element: <UserDashboard /> }, //dito pre
+  { path: "/device-overview", element: <DeviceOverview /> },
+  { path: "/notifications", element: <UserDashboard /> }, 
+  { path: "/manage-devices", element: <DeviceManagement /> },
 
 ])
 

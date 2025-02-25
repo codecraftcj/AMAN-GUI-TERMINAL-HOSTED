@@ -1,10 +1,11 @@
 import axios from "axios";
 
-export const API_URL = "http://simplegon-desktop:8080";
+export const API_URL = "http://simplegon-desktop.local:8080";
 
 export const api = axios.create({
   baseURL: API_URL,
   withCredentials: true, // If using cookies
+  timeout: 30000,
 });
 
 export const loginUser = async (credentials) => {
@@ -39,3 +40,121 @@ export const fetchDeviceCameraURL = async (device_id) => {
     let camera_url = `${API_URL}/device/${device_id}/camera`
     return camera_url;
 }
+
+export const sendDeviceCommand = async (device_id, command) => {
+  try {
+      const response = await fetch(`${API_URL}/device/${device_id}/jobs`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ command }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          throw new Error(data.error || "Failed to send command");
+      }
+
+      return data;
+  } catch (error) {
+      console.error("Error sending command:", error);
+      throw error;
+  }
+};
+
+export const fetchModelInference = async (device_id) => {
+  try {
+      const response = await fetch(`${API_URL}/device/${device_id}/model-inference`, {
+          method: "GET",
+      });
+
+      if (!response.ok) {
+          throw new Error("Failed to fetch model inference image");
+      }
+
+      // Convert response to blob and create an image URL
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      return imageUrl;
+  } catch (error) {
+      console.error("Error fetching model inference:", error);
+      throw error;
+  }
+};
+export const fetchRegisteredDevices = async () => {
+    try {
+        const response = await fetch(`${API_URL}/devices`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch registered devices");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching registered devices:", error);
+        throw error;
+    }
+};
+
+export const fetchAvailableDevices = async () => {
+    try {
+        const response = await fetch(`${API_URL}/get_available_devices`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch available devices");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching available devices:", error);
+        throw error;
+    }
+};
+
+export const confirmDevice = async (device_id) => {
+    try {
+        const response = await fetch(`${API_URL}/confirm_device`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Error confirming device");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error confirming device:", error);
+        throw error;
+    }
+};
+
+export const removeDevice = async (device_id) => {
+    try {
+        const response = await fetch(`${API_URL}/remove_device`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Error removing device");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error removing device:", error);
+        throw error;
+    }
+};
