@@ -1,6 +1,12 @@
 import axios from "axios";
 
-export const API_URL = "http://simplegon-desktop.local:8080";
+const TESTING = true
+
+let API_URL_TARGET = "http://simplegon-desktop.local:8080";
+if(TESTING){
+    API_URL_TARGET = "http://simplegon-desktop.local:8080";
+}
+export const API_URL = API_URL_TARGET;
 
 export const api = axios.create({
   baseURL: API_URL,
