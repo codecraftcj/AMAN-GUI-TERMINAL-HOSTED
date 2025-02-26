@@ -94,13 +94,12 @@ const DeviceOverview = () => {
       {/* Device Overview Header */}
       <div className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-900 text-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold">AMAN Device</h2>
-        <p className="text-sm text-gray-200">Select Device</p>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4 text-lg">
           {[
             { label: "Enclosure ID", value: waterParameters?.device_id || "C1_PG" },
           ].map(({ label, value }) => (
-            <div key={label} className="text-center">
+            <div key={label} className="text-left">
               <p className="font-bold">{value}</p>
               <p className="text-gray-300 text-sm">{label}</p>
             </div>

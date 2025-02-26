@@ -1,25 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import DrawerNav from "../components/DrawerNav";
+import AdminSidebar from "../components/AdminSidebar";
+import Header from "../components/Header";
+import DeviceOverview from "../components/DeviceOverview";
 
-const AdminDashboard = () => (
-  <div className="d-flex">
-    <DrawerNav isAdmin={true} />
-    <div className="ms-md-5 p-4 w-100">
-      <h1 className="text-white mb-4">Admin Dashboard</h1>
-      <div className="container">
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <button className="btn btn-primary w-100">Manage Users</button>
-          </div>
-          <div className="col-md-6 mb-3">
-            <button className="btn btn-secondary w-100">Manage Devices</button>
-          </div>
+const AdminDashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <Header toggleSidebar={toggleSidebar} />
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <AdminSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
+        {/* Main Content - Pushes Right When Sidebar is Open */}
+        <div className={`pt-20 transition-all duration-300 w-full ${sidebarOpen ? "ml-[250px] lg:ml-[280px]" : "ml-0 lg:ml-[280px]"}`}>
+          <Outlet/>
         </div>
       </div>
-      <Outlet />
     </div>
-  </div>
-);
+  );
+};
 
 export default AdminDashboard;
