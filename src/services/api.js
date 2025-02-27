@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const TESTING = true
+const TESTING = false
 
 let API_URL_TARGET = "http://simplegon-desktop.local:8080";
 if(TESTING){
-    API_URL_TARGET = "http://simplegon-desktop.local:8080";
+    API_URL_TARGET = "http://localhost:8080";
 }
 export const API_URL = API_URL_TARGET;
 
