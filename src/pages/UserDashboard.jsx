@@ -21,8 +21,8 @@ const UserDashboard = () => {
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
         {/* Main Content - Pushes Right When Sidebar is Open */}
-        <div className={`pt-20 transition-all duration-300 w-full ${sidebarOpen ? "ml-[250px] lg:ml-[280px]" : "ml-0 lg:ml-[280px]"}`}>
-          <DeviceOverview/>
+        <div className={`lg:p-5 mt-20 transition-all  duration-300 w-full ${sidebarOpen ? "ml-[250px] lg:ml-[280px]" : "ml-0 lg:ml-[280px]"}`}>
+          <Outlet/>
         </div>
       </div>
     </div>

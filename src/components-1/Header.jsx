@@ -13,6 +13,15 @@ const Header = ({ toggleSidebar }) => {
         <img src={Logo} alt="AMAN Logo" className="h-10" />
       </div>
 
+      {/* Middle: Search Bar */}
+      <div className="relative flex-1 max-w-lg mx-6 hidden md:block">
+        <input
+          type="text"
+          placeholder="Search"
+          className="w-full px-10 py-2 border rounded-lg focus:outline-none"
+        />
+        <IoSearchOutline size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+      </div>
 
       {/* Right: Notifications & Profile */}
       <div className="flex items-center space-x-4">

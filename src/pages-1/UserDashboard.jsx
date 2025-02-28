@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import AdminSidebar from "../components/AdminSidebar";
+import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import DeviceOverview from "../components/DeviceOverview";
 
@@ -18,11 +18,11 @@ const UserDashboard = () => {
 
       <div className="flex flex-1">
         {/* Sidebar */}
-        <AdminSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
         {/* Main Content - Pushes Right When Sidebar is Open */}
         <div className={`pt-20 transition-all duration-300 w-full ${sidebarOpen ? "ml-[250px] lg:ml-[280px]" : "ml-0 lg:ml-[280px]"}`}>
-          <Outlet/>
+          <DeviceOverview/>
         </div>
       </div>
     </div>

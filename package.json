@@ -14,11 +14,15 @@
     "@tailwindcss/vite": "^4.0.8",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.8",
+    "date-fns": "^4.1.0",
     "ngrok": "^5.0.0-beta.2",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.2.0"
+    "react-router-dom": "^7.2.0",
+    "sweetalert2": "^11.17.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

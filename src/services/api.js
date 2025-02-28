@@ -1,166 +1,196 @@
 import axios from "axios";
 
-const TESTING = false
+const TESTING = false;
+
 
 let API_URL_TARGET = "http://simplegon-desktop.local:8080";
 if(TESTING){
     API_URL_TARGET = "http://localhost:8080";
 }
+
 export const API_URL = API_URL_TARGET;
 
+// Axios instance with authentication handling
 export const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // If using cookies
+  withCredentials: false, // Adjust based on backend configuration
   timeout: 30000,
 });
 
+// Add JWT token to all requests
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Handle unauthorized (401) errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/"; // Redirect to login page
+    }
+    return Promise.reject(error);
+  }
+);
+
+/** 🔹 AUTHENTICATION API **/
 export const loginUser = async (credentials) => {
-    const response = await api.post("/auth/login", credentials);
-    return response.data;
-};
+    const response = await api.post("/login", credentials);
+    return response.data;  // Ensure backend sends { token, role, ... }
+  };
 
 export const fetchUser = async () => {
-  const response = await api.get("/auth/me", {
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-  });
+const token = localStorage.getItem("token");
+
+const response = await api.get("/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+});
+
+return response.data;
+};
+export const fetchUsers = async () => {
+    const response = await api.get("/get-users");
+    return response.data;
+  };
+  
+  export const createUser = async (userData) => {
+    const response = await api.post("/register-user", userData);
+    return response.data;
+  };
+  
+  export const updateUser = async (userId, userData) => {
+    const response = await api.put(`/update-user/${userId}`, userData);
+    return response.data;
+  };
+  
+  export const deleteUser = async (userId) => {
+    const response = await api.delete(`/delete-user/${userId}`);
+    return response.data;
+  };
+
+export const logoutUser = async () => {
+    try {
+        await api.post("/logout", {}, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href = "/"; // Redirect to login
+    } catch (error) {
+        console.error("Logout failed:", error);
+        throw error;
+    }
+};
+
+/** 🔹 DEVICE API **/
+export const fetchLatestWaterParameters = async () => {
+  const response = await api.get("/water-parameters/latest");
   return response.data;
 };
 
-export const logoutUser = async () => {
-  await api.post("/auth/logout");
-  localStorage.removeItem("token");
+export const fetchDeviceJobs = async (device_id, { nth = null, start = 0, limit = 10 } = {}) => {
+  const params = {};
+
+  if (nth !== null) params.nth = nth;  // Fetch a specific Nth row
+  if (start !== null) params.start = start;  // Start index for pagination
+  if (limit !== null) params.limit = limit;  // Number of jobs to fetch
+
+  const response = await api.get(`/device/${device_id}/jobs`, { params });
+  return response.data;
 };
 
-export const fetchLatestWaterParameters = async () => { //@TODO: modify to get the latest water parameters of 1 device only
-    const response = await api.get("/water-parameters/latest");
-    return response.data;
-}
-
-export const fetchDeviceJobs = async (device_id) => {
-    const response = await api.get(`/device/${device_id}/jobs`);
-    return response.data;
-}
-
-
 export const fetchDeviceCameraURL = async (device_id) => {
-    let camera_url = `${API_URL}/device/${device_id}/camera`
-    return camera_url;
-}
+  return `${API_URL}/device/${device_id}/camera`;
+};
 
 export const sendDeviceCommand = async (device_id, command) => {
-  try {
-      const response = await fetch(`${API_URL}/device/${device_id}/jobs`, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ command }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-          throw new Error(data.error || "Failed to send command");
-      }
-
-      return data;
-  } catch (error) {
-      console.error("Error sending command:", error);
-      throw error;
-  }
+  const response = await api.post(`/device/${device_id}/jobs`, { command });
+  return response.data;
 };
 
 export const fetchModelInference = async (device_id) => {
-  try {
-      const response = await fetch(`${API_URL}/device/${device_id}/model-inference`, {
-          method: "GET",
-      });
-
-      if (!response.ok) {
-          throw new Error("Failed to fetch model inference image");
-      }
-
-      // Convert response to blob and create an image URL
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      return imageUrl;
-  } catch (error) {
-      console.error("Error fetching model inference:", error);
-      throw error;
-  }
+  const response = await api.get(`/device/${device_id}/model-inference`, { responseType: "blob" });
+  return URL.createObjectURL(response.data);
 };
+
+/** 🔹 DEVICE MANAGEMENT **/
 export const fetchRegisteredDevices = async () => {
-    try {
-        const response = await fetch(`${API_URL}/devices`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch registered devices");
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching registered devices:", error);
-        throw error;
-    }
+  const response = await api.get("/devices");
+  return response.data;
 };
 
 export const fetchAvailableDevices = async () => {
-    try {
-        const response = await fetch(`${API_URL}/get_available_devices`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch available devices");
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching available devices:", error);
-        throw error;
-    }
+  const response = await api.get("/get_available_devices");
+  return response.data;
 };
 
 export const confirmDevice = async (device_id) => {
-    try {
-        const response = await fetch(`${API_URL}/confirm_device`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ device_id }),
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || "Error confirming device");
-        }
-
-        return data;
-    } catch (error) {
-        console.error("Error confirming device:", error);
-        throw error;
-    }
+  const response = await api.post("/confirm_device", { device_id });
+  return response.data;
 };
 
 export const removeDevice = async (device_id) => {
-    try {
-        const response = await fetch(`${API_URL}/remove_device`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ device_id }),
-        });
+  const response = await api.delete("/remove_device", { data: { device_id } });
+  return response.data;
+};
 
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || "Error removing device");
-        }
+export const fetchJobs = async()=>{
+    const response = await api.get("/get-jobs");
+    return response.data;
+}
 
-        return data;
-    } catch (error) {
-        console.error("Error removing device:", error);
-        throw error;
-    }
+// Fetch unread notifications
+export const fetchUnreadNotifications = async (start = 0, limit = 10) => {
+  const response = await api.get("/notifications/unread", { params: { start, limit } });
+  return response.data;
+};
+
+// Mark a notification as seen
+export const markNotificationAsSeen = async (notification_id) => {
+  const response = await api.post("/notifications/mark-seen", { notification_id });
+  return response.data;
+};
+
+// Process the current frame from the camera
+export const processCurrentFrame = async (imageBlob) => {
+  const formData = new FormData();
+  formData.append("image", imageBlob);
+
+  const response = await api.post("/device/model-inference", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    responseType: "blob", // Expect an image response
+  });
+
+  return URL.createObjectURL(response.data);
+};
+
+export const getNthWaterParameters = async (nth = 10) => {
+  try {
+    const response = await fetch(`${API_URL}/get-water-parameters`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ limit: nth }), // Pass nth as limit
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch water parameters");
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching Nth water parameters:", error);
+    return [];
+  }
 };
