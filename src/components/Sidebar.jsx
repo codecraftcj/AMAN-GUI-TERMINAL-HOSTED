@@ -17,7 +17,7 @@ import {
   IoChevronDownOutline,
   IoShieldCheckmarkOutline
 } from "react-icons/io5";
-import Logo from "../assets/aman-logo-dark.png";
+import Logo from "../assets/aman-logo-light.png";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { logout } = useAuth();
@@ -40,8 +40,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       } lg:translate-x-0 lg:w-[300px] w-[250px] z-50 shadow-lg`}
     >
       {/* Logo & Close Button */}
-      <div className="p-5 flex items-center justify-between">
-        <img src={Logo} alt="Logo" className="h-16" />
+      <div className="p-5 flex items-center justify-center">
+      <img src={Logo} alt="Logo" className="h-[170px]" />
         <button className="lg:hidden text-white bg-transparent" onClick={toggleSidebar}>
           <IoClose size={24} />
         </button>
@@ -57,7 +57,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             { to: "job-queue", label: "Job Queue", Icon: IoListOutline },
             { to: "analytics", label: "Analytics & Reports", Icon: IoBarChartOutline },
             { to: "notifications", label: "Notifications & Alerts", Icon: IoNotificationsOutline },
-            { to: "fish-health-checker", label: "Fish Health Checker", Icon: IoFishOutline },
+            { to: "development", label: "Development", Icon: IoNotificationsOutline },
+            { to: "fish-health-checker", label: "Fish Health Checker", Icon: IoShieldCheckmarkOutline},
           ].map(({ to, label, Icon }) => (
             <NavLink
               key={to}

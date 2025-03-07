@@ -40,7 +40,15 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
+export const fetchDeviceOverview = async (device_id) => {
+  try {
+      const response = await api.get(`/device/${device_id}/overview`);
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching device overview:", error);
+      throw error;
+  }
+};
 /** 🔹 AUTHENTICATION API **/
 export const loginUser = async (credentials) => {
     const response = await api.post("/login", credentials);
@@ -115,6 +123,10 @@ export const fetchDeviceCameraURL = async (device_id) => {
   return `${API_URL}/device/${device_id}/camera`;
 };
 
+export const fetchTerminalCameraURL = async () => {
+  return `${API_URL}/video_feed`;
+};
+
 export const sendDeviceCommand = async (device_id, command) => {
   const response = await api.post(`/device/${device_id}/jobs`, { command });
   return response.data;
@@ -140,6 +152,23 @@ export const confirmDevice = async (device_id) => {
   const response = await api.post("/confirm_device", { device_id });
   return response.data;
 };
+export const registerDevice = async (deviceName, ipAddress) => {
+  try {
+      const response = await api.post("/register_device", {
+          device_id: deviceName,
+          local_ip: ipAddress
+      });
+
+      if (!response.data || response.data.error) {
+          throw new Error(response.data?.error || "Error registering device");
+      }
+
+      return response.data;
+  } catch (error) {
+      console.error("Error registering device:", error);
+      throw error;
+  }
+};
 
 export const removeDevice = async (device_id) => {
   const response = await api.delete("/remove_device", { data: { device_id } });
@@ -163,17 +192,25 @@ export const markNotificationAsSeen = async (notification_id) => {
   return response.data;
 };
 
-// Process the current frame from the camera
 export const processCurrentFrame = async (imageBlob) => {
   const formData = new FormData();
-  formData.append("image", imageBlob);
+  formData.append("image", imageBlob, "frame.jpg");
 
-  const response = await api.post("/device/model-inference", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-    responseType: "blob", // Expect an image response
-  });
+  try {
+    const response = await api.post("/detect", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      responseType: "blob", // Expect an image response
+    });
 
-  return URL.createObjectURL(response.data);
+    if (!response || !response.data) {
+      throw new Error("No response from the server.");
+    }
+
+    return URL.createObjectURL(response.data); // Create a URL for the processed image
+  } catch (error) {
+    console.error("Error processing frame:", error);
+    throw error;
+  }
 };
 
 export const getNthWaterParameters = async (nth = 10) => {
@@ -192,5 +229,36 @@ export const getNthWaterParameters = async (nth = 10) => {
   } catch (error) {
     console.error("Error fetching Nth water parameters:", error);
     return [];
+  }
+};
+
+/** 🔹 FEEDING SCHEDULE API **/
+export const setDeviceFeedingSchedule = async (device_id, schedule) => {
+  try {
+    const response = await api.post(`/device/${device_id}/feeding-schedule`, { schedule });
+    return response.data;
+  } catch (error) {
+    console.error("Error setting device feeding schedule:", error);
+    throw error;
+  }
+};
+
+export const getDeviceFeedingSchedule = async (device_id) => {
+  try {
+    const response = await api.get(`/device/${device_id}/feeding-schedule`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching device feeding schedule:", error);
+    throw error;
+  }
+};
+
+export const updateWaterParametersGSheet = async (waterParameters) => {
+  try {
+    const response = await api.post("/update-water-parameters-gsheet", waterParameters);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating water parameters:", error);
+    throw error;
   }
 };

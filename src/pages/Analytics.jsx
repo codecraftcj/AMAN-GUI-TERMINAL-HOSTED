@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { getNthWaterParameters } from "../services/api";
+import { getNthWaterParameters,updateWaterParametersGSheet } from "../services/api";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import { IoDownloadOutline } from "react-icons/io5"; // Import export icon
+
+const SENSOR_PARAMETERS = [
+  { label: "Temperature (°C)", key: "temperature" },
+  { label: "pH Level", key: "ph_level" },
+  { label: "Turbidity (NTU)", key: "turbidity" },
+  { label: "Hydrogen Sulfide (mg/L)", key: "hydrogen_sulfide_level" },
+];
 
 const Analytics = () => {
   const [waterData, setWaterData] = useState([]);
@@ -11,19 +19,15 @@ const Analytics = () => {
 
   useEffect(() => {
     loadWaterData();
-  }, [selectedParameter, nthRow]);
+  }, [nthRow]);
 
   const loadWaterData = async () => {
     setLoading(true);
     try {
       const data = await getNthWaterParameters(nthRow);
-
-      const formattedData = data.map((param) => ({
-        time: new Date(param.created_date).toLocaleTimeString(),
-        value: param[selectedParameter],
-      }));
-
-      setWaterData(formattedData);
+      console.log("WATER DATA");
+      console.log(data);
+      setWaterData(data);
     } catch (error) {
       console.error("Error fetching water parameters:", error);
     } finally {
@@ -31,13 +35,13 @@ const Analytics = () => {
     }
   };
 
-  // Prepare chart data
+  // Prepare chart data for the selected parameter
   const chartData = {
-    labels: waterData.map((entry) => entry.time),
+    labels: waterData.map((entry) => new Date(entry.created_date).toLocaleTimeString()),
     datasets: [
       {
         label: selectedParameter.toUpperCase(),
-        data: waterData.map((entry) => entry.value),
+        data: waterData.map((entry) => entry[selectedParameter]),
         borderColor: "#3B82F6",
         backgroundColor: "rgba(59, 130, 246, 0.2)",
         borderWidth: 2,
@@ -47,24 +51,64 @@ const Analytics = () => {
     ],
   };
 
+  // Export all sensor data to CSV
+  const handleExport = () => {
+    if (!waterData.length) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // CSV Header
+    const csvHeader = ["Time", "Temperature (°C)", "pH Level", "Turbidity (NTU)", "Hydrogen Sulfide (mg/L)"];
+    const csvRows = waterData.map((entry) => [
+      new Date(entry.created_date).toLocaleTimeString(),
+      entry.temperature,
+      entry.ph_level,
+      entry.turbidity,
+      entry.hydrogen_sulfide_level,
+    ]);
+
+    // Convert to CSV format
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [csvHeader.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+
+    // Create and trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `sensor_data_last_${nthRow}_records.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleUpdateGSheet = async () => {
+    try {
+      const response = await updateWaterParametersGSheet(waterData);
+      console.log("✅ Success:", response);
+    } catch (error) {
+      console.error("❌ Error:", error);
+    }
+  };
   return (
-    <div className="p-5 mt-20 w-full">
+    <div className="w-full">
       <div className="p-6 bg-white rounded-lg shadow-md">
         <h3 className="text-lg font-bold pb-2 border-b">Water Quality Analytics</h3>
 
-        {/* Select Parameter */}
-        <div className="mt-4">
-          <label className="block text-sm font-semibold">Select Parameter:</label>
-          <select
-            className="w-full p-2 mt-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            value={selectedParameter}
-            onChange={(e) => setSelectedParameter(e.target.value)}
-          >
-            <option value="temperature">Temperature (°C)</option>
-            <option value="ph_level">pH Level</option>
-            <option value="turbidity">Turbidity (NTU)</option>
-            <option value="hydrogen_sulfide_level">Hydrogen Sulfide (mg/L)</option>
-          </select>
+        {/* Sensor Tabs */}
+        <div className="flex space-x-4 mt-4 border-b overflow-x-auto">
+          {SENSOR_PARAMETERS.map(({ label, key }) => (
+            <button
+              key={key}
+              className={`py-2 px-4 border-b-2 ${
+                selectedParameter === key ? "border-blue-500 text-blue-600 font-bold" : "text-gray-500"
+              }`}
+              onClick={() => setSelectedParameter(key)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Nth Row Slider */}
@@ -93,6 +137,27 @@ const Analytics = () => {
             </div>
           </div>
         )}
+
+        {/* Export Button */}
+        <div className="mt-6 flex justify-end">
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition"
+            onClick={handleExport}
+          >
+            <IoDownloadOutline className="mr-2" size={18} />
+            Export All Sensor Data
+          </button>
+        </div>
+        {/* Export Button */}
+        <div className="mt-6 flex justify-end">
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition"
+            onClick={handleUpdateGSheet}
+          >
+            <IoDownloadOutline className="mr-2" size={18} />
+            Export to GSheet
+          </button>
+        </div>
       </div>
     </div>
   );

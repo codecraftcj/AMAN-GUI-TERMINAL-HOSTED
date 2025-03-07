@@ -6,13 +6,15 @@ import {
   sendDeviceCommand,
 } from "../services/api";
 import { Line } from "react-chartjs-2";
+import Analytics from "../pages/Analytics.jsx";
 import "chart.js/auto";
-
+import Swal from "sweetalert2"; 
 const DEVICE_ID = "EMULATOR-001";
 
 const DeviceOverview = () => {
   const [waterParameters, setWaterParameters] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState([]);
   const [selectedSensor, setSelectedSensor] = useState("temperature");
   const [nthRow, setNthRow] = useState(10); // Default fetch limit
   const [sensorData, setSensorData] = useState([]);
@@ -28,7 +30,7 @@ const DeviceOverview = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchWaterParameters, 60000);
+    const interval = setInterval(fetchWaterParameters, 30000);
 
     return () => {
       isMounted = false;
@@ -76,11 +78,30 @@ const DeviceOverview = () => {
 
   const handleSendCommand = async (command) => {
     try {
-      await sendDeviceCommand(DEVICE_ID, command);
-      console.log(`Command sent: ${command}`);
-      fetchDeviceJobsJSON();
+      Swal.fire({
+        title: "Sending Command...",
+        text: `Executing ${command.replace("_", " ")} command.`,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      console.log("COMMAND ", command);
+      await sendDeviceCommand(DEVICE_ID,command); // Simulated API call
+  
+      Swal.fire({
+        icon: "success",
+        title: "Command Sent!",
+        text: `The "${command.replace("_", " ")}" command was successfully executed.`,
+        showConfirmButton: false,
+        timer: 2000, // Auto close in 2 seconds
+      });
     } catch (error) {
-      console.error(`Failed to send command: ${command}`, error);
+      Swal.fire({
+        icon: "error",
+        title: "Command Failed",
+        text: `The "${command.replace("_", " ")}" command could not be executed.`,
+      });
     }
   };
 
@@ -89,7 +110,7 @@ const DeviceOverview = () => {
       {/* Device Overview Header */}
       <div className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-900 text-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold">Farm Overview</h2>
-        <div className="grid grid-cols-2 md:grid-cols-1 gap-4 mt-4 text-lg">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4 text-lg">
           {[{ label: "Bureau of Fisheries and Aquatic Resources. Fisheries Building Complex, BPI Compound, Visayas Ave, Quezon City, Philippines 1128.", value: "Bureau of Fisheries and Aquatic Resources" }]
             .map(({ label, value }) => (
               <div key={label} className="text-left">
@@ -127,67 +148,26 @@ const DeviceOverview = () => {
           </div>
         )}
       </div>
-
-      {/* Sensor Data Chart */}
-      <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-xl font-bold">Sensor Data Over Time</h3>
-
-        {/* Nth Row Selection */}
-        <div className="mt-4">
-          <label className="block text-sm font-semibold">Select Data Limit (Nth Row):</label>
-          <input
-            type="range"
-            min="5"
-            max="50"
-            step="5"
-            value={nthRow}
-            onChange={(e) => setNthRow(Number(e.target.value))}
-            className="w-full mt-2"
-          />
-          <p className="text-center text-gray-700">Showing last {nthRow} records</p>
-        </div>
-
-        {/* Sensor Selection */}
-        <div className="mt-4">
-          <label className="block text-sm font-semibold">Select Water Quality Parameter:</label>
-          <select
-            className="p-2 border border-gray-300 rounded mt-1"
-            value={selectedSensor}
-            onChange={(e) => setSelectedSensor(e.target.value)}
+      <div className="mt-6 p-6 bg-white rounded-lg shadow-md w-full">
+      <h3 className="text-xl font-bold mb-4">Motor Controls</h3>
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        {[
+          { label: "Small Open", command: "small open", color: "bg-blue-500 hover:bg-blue-600" },
+          { label: "Half Open", command: "half open", color: "bg-blue-500 hover:bg-blue-600" },
+          { label: "Full Open", command: "full open", color: "bg-blue-500 hover:bg-blue-600" },
+        ].map(({ label, command, color }) => (
+          <button
+            key={command}
+            className={`w-40 px-6 py-3 text-white rounded-lg transition-all shadow-md ${color}`}
+            onClick={() => handleSendCommand(command)}
           >
-            <option value="temperature">Temperature</option>
-            <option value="turbidity">Turbidity</option>
-            <option value="ph_level">pH Level</option>
-            <option value="hydrogen_sulfide_level">Hydrogen Sulfide</option>
-          </select>
-        </div>
-
-        {/* Chart Component */}
-        <div className="mt-4">
-          <Line
-            data={{
-              labels: sensorData.map((d) => d.time),
-              datasets: [
-                {
-                  label: selectedSensor,
-                  data: sensorData.map((d) => d.value),
-                  borderColor: "#3B82F6",
-                  borderWidth: 2,
-                  backgroundColor: "rgba(59, 130, 246, 0.2)",
-                  fill: true,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              scales: {
-                x: { title: { display: true, text: "Time" } },
-                y: { title: { display: true, text: "Sensor Value" } },
-              },
-            }}
-          />
-        </div>
+            {label}
+          </button>
+        ))}
       </div>
+      </div>
+
+      <Analytics/>
     </div>
   );
 };

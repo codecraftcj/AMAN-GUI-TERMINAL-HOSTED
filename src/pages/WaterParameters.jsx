@@ -22,7 +22,7 @@ const WaterParameters = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Fetch new data every 60 seconds
+    const interval = setInterval(fetchData, 30000); // Fetch new data every 30 seconds
 
     return () => {
       isMounted = false;
@@ -31,7 +31,7 @@ const WaterParameters = () => {
   }, []);
 
   return (
-    <div className="lg:p-5 sm:p-5 mt-5  w-full">
+    <div className="lg:p-5 sm:p-5  w-full">
       <h2 className="text-3xl font-bold text-gray-900">Water Parameters</h2>
       <p className="text-gray-500">Live data from your connected devices.</p>
 

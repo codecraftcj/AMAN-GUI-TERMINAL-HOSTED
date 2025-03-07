@@ -54,7 +54,27 @@ a{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
 
+/* Track */
+::-webkit-scrollbar-track {
+
+  background: none;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #1c398e;
+  border-radius: 20px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: none;
+}
 a {
   font-weight: 500;
   color: #646cff;
