@@ -14,8 +14,7 @@ import { IoAddOutline, IoClose } from "react-icons/io5";
 import AddDevice from "./AddDevice"; // Import AddDevice component
 import FeedingSchedule from "./FeedingSchedule";
 import JobQueue from "./JobQueue";
-import DeviceCamera from "./DeviceCamera"
-import MotorControls from "./MotorControls"
+
 const STATUS_COLORS = {
   connected: "bg-green-500",
   available: "bg-yellow-500",
@@ -24,6 +23,7 @@ const STATUS_COLORS = {
 
 const ManageDevices = () => {
   const [availableDevices, setAvailableDevices] = useState([]);
+  const [registeredDevices, setRegisteredDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [activeTab, setActiveTab] = useState("device-info");
   const [deviceInfo, setDeviceInfo] = useState(null);
@@ -45,7 +45,8 @@ const ManageDevices = () => {
         hostname: info.hostname || "Unknown",
         status: info.status || "AVAILABLE",
       }));
-
+      const registered = await fetchRegisteredDevices();
+      setRegisteredDevices(registered);
       // Retrieve stored connected devices from localStorage
       const storedConnectedDevices = JSON.parse(localStorage.getItem("connectedDevices")) || [];
 
@@ -164,53 +165,32 @@ const ManageDevices = () => {
 
   return (
     <div className="p-6 min-h-screen">
-       <div className="w-full min-h-screen">
-      {/* Device Overview Header */}
-      <div className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-900 text-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold">Manage Devices</h2>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4 text-lg">
-          {[{ label:"Stay in control of your networked devices with real-time status updates, easy connectivity, and seamless integration." , value: "Effortlessly Connect, Monitor, and Manage Your Devices."  }]
-            .map(({ label, value }) => (
-              <div key={label} className="text-left">
-                <p className="font-bold">{value}</p>
-                <p className="text-gray-300 text-sm">{label}</p>
-              </div>
-            ))}
-        </div>
-      </div>
-  
-    {/* Available Devices */}
-    <div className="mt-6">
-      {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {availableDevices.length > 0 ? (
-            availableDevices.map((device) => (
-              <div
-                key={device.device_id}
-                className="relative bg-white border-1 border-black p-4 rounded-xl transition-transform transform hover:scale-105 hover:shadow-lg cursor-pointer"
-                onClick={() => openDeviceModal(device)}
-              >
-                {/* Status Indicator */}
-                <div className="absolute top-3 right-3 w-4 h-4 rounded-full border border-white shadow-sm 
-                    animate-pulse transition-all duration-200 
-                    ${device.status === 'connected' ? 'bg-green-500' : 'bg-yellow-500'}"
-                />
+      <h2 className="text-2xl font-bold">Manage Devices</h2>
 
-                {/* Device Info */}
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{device.device_id}</h3>
-                <p className="text-gray-600 text-sm font-medium">{device.hostname}</p>
-                <p className={`text-sm font-bold mt-1 uppercase tracking-wide 
-                  ${device.status === 'connected' ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {device.status.toUpperCase()}
-                </p>
-
-                {/* Action Buttons */}
-                <div className="mt-4 flex justify-between">
+      {/* Available Devices */}
+      <div className="mt-6">
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {availableDevices.length > 0 ? (
+              availableDevices.map((device) => (
+                <div
+                  key={device.device_id}
+                  className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between cursor-pointer"
+                  onClick={() => openDeviceModal(device)}
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">{device.device_id}</h3>
+                    <div className={`w-4 h-4 rounded-full ${STATUS_COLORS[device.status]}`} />
+                  </div>
+                  <p className="text-gray-600">{device.hostname}</p>
+                  <p className={`text-sm font-bold ${device.status === "connected" ? "text-green-600" : "text-yellow-600"}`}>
+                    {device.status.toUpperCase()}
+                  </p>
                   {device.status === "connected" ? (
                     <button
-                      className="w-full px-4 py-2 text-white font-semibold rounded-lg bg-red-600 hover:bg-red-700 transition-all shadow-md"
+                      className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDisconnectDevice(device.device_id);
@@ -220,7 +200,7 @@ const ManageDevices = () => {
                     </button>
                   ) : (
                     <button
-                      className="w-full px-4 py-2 text-white font-semibold rounded-full bg-blue-600 hover:bg-blue-700 transition-all shadow-md"
+                      className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleConfirmDevice(device.device_id);
@@ -230,15 +210,13 @@ const ManageDevices = () => {
                     </button>
                   )}
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-500">No available devices</p>
-          )}
-        </div>
-      )}
-    </div>
-
+              ))
+            ) : (
+              <p className="text-center text-gray-500">No available devices</p>
+            )}
+          </div>
+        )}
+      </div>
 
     {/* Device Details Modal */}
     {selectedDevice && (
@@ -276,18 +254,6 @@ const ManageDevices = () => {
               className={`py-2 px-4 ${activeTab === "job-queue" ? "border-b-2 border-blue-500" : ""}`}
             >
               Job Queue
-            </button>
-            <button
-              onClick={() => setActiveTab("camera-view")}
-              className={`py-2 px-4 ${activeTab === "camera-view" ? "border-b-2 border-blue-500" : ""}`}
-            >
-              Camera View
-            </button>
-            <button
-              onClick={() => setActiveTab("motor-controls")}
-              className={`py-2 px-4 ${activeTab === "motor-controls" ? "border-b-2 border-blue-500" : ""}`}
-            >
-              Motor Controls
             </button>
           </div>
 
@@ -332,13 +298,9 @@ const ManageDevices = () => {
           {activeTab === "job-queue" && (
               <JobQueue/>
           )}
-          {/* Device Camera */}
-          {activeTab === "camera-view" && <DeviceCamera deviceId={selectedDevice.device_id} />}
-          {activeTab === "motor-controls" && <MotorControls deviceId={selectedDevice.device_id} />}
         </div>
       </div>
     )}
-    </div>
     </div>
   );
 };

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { getNthWaterParameters,updateWaterParametersGSheet } from "../services/api";
+import { getNthWaterParameters, updateWaterParametersGSheet } from "../services/api";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
 import { IoDownloadOutline } from "react-icons/io5"; // Import export icon
+import Swal from "sweetalert2";
 
 const SENSOR_PARAMETERS = [
   { label: "Temperature (°C)", key: "temperature" },
@@ -15,18 +16,30 @@ const Analytics = () => {
   const [waterData, setWaterData] = useState([]);
   const [selectedParameter, setSelectedParameter] = useState("temperature");
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [nthRow, setNthRow] = useState(10); // Default fetch limit
-
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
   useEffect(() => {
     loadWaterData();
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, [nthRow]);
 
   const loadWaterData = async () => {
     setLoading(true);
     try {
       const data = await getNthWaterParameters(nthRow);
-      console.log("WATER DATA");
-      console.log(data);
+      console.log("WATER DATA", data);
       setWaterData(data);
     } catch (error) {
       console.error("Error fetching water parameters:", error);
@@ -54,43 +67,58 @@ const Analytics = () => {
   // Export all sensor data to CSV
   const handleExport = () => {
     if (!waterData.length) {
-      alert("No data available to export.");
+      Swal.fire("No Data", "No data available to export.", "warning");
       return;
     }
+    setExporting(true);
 
-    // CSV Header
-    const csvHeader = ["Time", "Temperature (°C)", "pH Level", "Turbidity (NTU)", "Hydrogen Sulfide (mg/L)"];
-    const csvRows = waterData.map((entry) => [
-      new Date(entry.created_date).toLocaleTimeString(),
-      entry.temperature,
-      entry.ph_level,
-      entry.turbidity,
-      entry.hydrogen_sulfide_level,
-    ]);
+    try {
+      // CSV Header
+      const csvHeader = ["Time", "Temperature (°C)", "pH Level", "Turbidity (NTU)", "Hydrogen Sulfide (mg/L)"];
+      const csvRows = waterData.map((entry) => [
+        new Date(entry.created_date).toLocaleTimeString(),
+        entry.temperature,
+        entry.ph_level,
+        entry.turbidity,
+        entry.hydrogen_sulfide_level,
+      ]);
 
-    // Convert to CSV format
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [csvHeader.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+      // Convert to CSV format
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [csvHeader.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
 
-    // Create and trigger download
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `sensor_data_last_${nthRow}_records.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Create and trigger download
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `sensor_data_last_${nthRow}_records.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      Swal.fire("Success", "Sensor data exported successfully.", "success");
+    } catch (error) {
+      Swal.fire("Error", "Failed to export data.", "error");
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleUpdateGSheet = async () => {
+    setUpdating(true);
+    Swal.fire({ title: "Updating", text: "Please wait...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    
     try {
-      const response = await updateWaterParametersGSheet(waterData);
-      console.log("✅ Success:", response);
+      await updateWaterParametersGSheet(waterData);
+      Swal.fire("Success", "Data successfully exported to Google Sheets!", "success");
     } catch (error) {
-      console.error("❌ Error:", error);
+      Swal.fire("Error", "Failed to export data to Google Sheets.", "error");
+    } finally {
+      setUpdating(false);
     }
   };
+
   return (
     <div className="w-full">
       <div className="p-6 bg-white rounded-lg shadow-md">
@@ -138,25 +166,44 @@ const Analytics = () => {
           </div>
         )}
 
-        {/* Export Button */}
-        <div className="mt-6 flex justify-end">
+        {/* Export Buttons */}
+        <div className="mt-6 flex justify-end space-x-4">
+        {isOnline ? 
+        
+       <div className="flex">
           <button
-            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition"
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition disabled:opacity-50"
             onClick={handleExport}
+            disabled={exporting}
           >
             <IoDownloadOutline className="mr-2" size={18} />
-            Export All Sensor Data
+            {exporting ? "Exporting..." : "Export All Sensor Data"}
           </button>
-        </div>
-        {/* Export Button */}
-        <div className="mt-6 flex justify-end">
           <button
-            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition"
-            onClick={handleUpdateGSheet}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-600 transition disabled:opacity-50"
+          onClick={handleUpdateGSheet}
+          disabled={updating}
+        >
+          <IoDownloadOutline className="mr-2" size={18} />
+          {updating ? "Updating..." : "Export to GSheet"}
+        </button>
+        </div>
+        
+        
+        :  
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 transition disabled:opacity-50"
+            onClick={handleExport}
+            disabled={exporting}
           >
             <IoDownloadOutline className="mr-2" size={18} />
-            Export to GSheet
+            {exporting ? "Exporting..." : "Export All Sensor Data"}
           </button>
+        
+        }
+          
+
+          
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ import {
   IoClose,
   IoPersonOutline,
 } from "react-icons/io5";
-import Logo from "../assets/aman-logo-dark.png";
+import Logo from "../assets/aman-logo-light.png";
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
   const { logout } = useAuth(); // Access logout function

@@ -20,6 +20,7 @@ import Analytics from './pages/Analytics.jsx';
 import FeedingHistory from './pages/FeedingHistory.jsx';
 import FeedingSchedule from './pages/FeedingSchedule.jsx';
 import Development from './pages/Development.jsx';
+import OldDev from './pages/Development_old.jsx';
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> }, // Login Page
 
@@ -28,16 +29,16 @@ const router = createBrowserRouter([
     element: <ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>,
     children: [
       { path: "device-overview", element: <DeviceOverview /> },
-      { path: "water-parameters", element: <WaterParameters/> },
+      // { path: "water-parameters", element: <WaterParameters/> },
       { path: "manage-devices", element: <ManageDevices/> },
-      { path: "job-queue", element: <JobQueue /> },
+      // { path: "job-queue", element: <JobQueue /> },
       { path: "notifications", element: <Notifications /> },
       { path: "settings", element: <Settings />},
-      { path: "feeding-history",element : <FeedingHistory />},
-      { path: "feeding-schedule",element : <FeedingSchedule/>},
+      // { path: "feeding-history",element : <FeedingHistory />},
+      // { path: "feeding-schedule",element : <FeedingSchedule/>},
       { path: "fish-health-checker",element : <FishHealthChecker />},
       { path: "analytics",element : <Analytics />},
-      { path: "development",element : <Development/>}
+      // { path: "development",element : <ManageDevices/>}
 
     ],
   },

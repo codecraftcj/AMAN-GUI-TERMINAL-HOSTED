@@ -149,7 +149,7 @@ const DeviceOverview = () => {
         )}
       </div>
       <div className="mt-6 p-6 bg-white rounded-lg shadow-md w-full">
-      <h3 className="text-xl font-bold mb-4">Motor Controls</h3>
+      {/* <h3 className="text-xl font-bold mb-4">Motor Controls</h3>
       <div className="flex flex-col sm:flex-row items-center gap-4">
         {[
           { label: "Small Open", command: "small open", color: "bg-blue-500 hover:bg-blue-600" },
@@ -164,7 +164,7 @@ const DeviceOverview = () => {
             {label}
           </button>
         ))}
-      </div>
+      </div> */}
       </div>
 
       <Analytics/>

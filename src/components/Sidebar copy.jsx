@@ -53,11 +53,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           {[
             { to: "device-overview", label: "Overview", Icon: IoHomeOutline },
             { to: "manage-devices", label: "Device Management", Icon: IoHardwareChipOutline },
-            // { to: "water-parameters", label: "Water Parameters", Icon: IoWaterOutline },
-            // { to: "job-queue", label: "Job Queue", Icon: IoListOutline },
+            { to: "water-parameters", label: "Water Parameters", Icon: IoWaterOutline },
+            { to: "job-queue", label: "Job Queue", Icon: IoListOutline },
             { to: "analytics", label: "Analytics & Reports", Icon: IoBarChartOutline },
             { to: "notifications", label: "Notifications & Alerts", Icon: IoNotificationsOutline },
-            // { to: "development", label: "Development", Icon: IoNotificationsOutline },
+            { to: "development", label: "Development", Icon: IoNotificationsOutline },
             { to: "fish-health-checker", label: "Fish Health Checker", Icon: IoShieldCheckmarkOutline},
           ].map(({ to, label, Icon }) => (
             <NavLink
@@ -74,7 +74,39 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </NavLink>
           ))}
 
+          Feeding Overview with Clickable Submenu
+          <div className="cursor-pointer">
+            <button
+              className="w-full flex items-center justify-between px-6 py-3 hover:bg-blue-800"
+              onClick={() => setIsFeedingOpen(!isFeedingOpen)}
+            >
+              <div className="flex items-center space-x-3">
+                <IoFishOutline size={20} />
+                <span>Feeding Overview</span>
+              </div>
+              <IoChevronDownOutline size={18} className={`transform ${isFeedingOpen ? "rotate-180" : ""}`} />
+            </button>
 
+            {/* Submenu - Only visible when clicked */}
+            {isFeedingOpen && (
+              <div className="bg-blue-800 w-full rounded-md shadow-lg">
+                <NavLink
+                  to="feeding-schedule"
+                  className="block px-6 py-3 hover:bg-blue-900 text-white flex items-center space-x-3"
+                >
+                  <IoTimeOutline size={18} />
+                  <span>Feeding Schedule</span>
+                </NavLink>
+                <NavLink
+                  to="feeding-history"
+                  className="block px-6 py-3 hover:bg-blue-900 text-white flex items-center space-x-3"
+                >
+                  <IoBookOutline size={18} />
+                  <span>Feeding History</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 
